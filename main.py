@@ -7,14 +7,18 @@ from flask_mail import Mail, Message
 
 app = Flask(__name__)
 
-app_pass = os.getenv("APP_PASS")
+load_dotenv()
 app_email = os.getenv("APP_EMAIL")
+app_pass = os.getenv("APP_PASS")
+
+print(app_email)
+print(app_pass)
 
 app.config['SECRET_KEY'] = 'myapplication123'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config["MAIL_SERVER"] = "smtp.gmail.com"
 app.config["MAIL_PORT"] = 465
-app.config["MAIL_USE_SSL"] = False
+app.config["MAIL_USE_SSL"] = True
 app.config["MAIL_USERNAME"] = app_email
 app.config["MAIL_PASSWORD"] = app_pass
 
@@ -46,14 +50,15 @@ def index():
         db.session.add(form)
         db.session.commit()
 
-        message_body = (f"Thank you for your submission, {first_name}."
-                        f"Here is your data: \n {first_name} \n {last_name}"
-                        f" \n {available_start_date} \n {occupation}"
+        message_body = (f"Thank you for your submission, {first_name}. \n"
+                        f"Here is your data:\n{first_name} {last_name}"
+                        f"\n{available_start_date} \n{occupation}\n"
                         f"Thank you!")
-        message = Message('New form submission',
-                          sender='app.config["MAIL_USERNAME"]',
-                          recipients=['email'],
+        message = Message(f"New form submission - {first_name} {last_name}",
+                          sender='app_email',
+                          recipients=[app_email],
                           body=message_body)
+        mail.send(message)
 
         flash("Your form was submitted successfully!", "success")
 
